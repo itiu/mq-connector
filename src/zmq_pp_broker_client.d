@@ -42,6 +42,19 @@ static string PPP_READY;
 
 class zmq_pp_broker_client: mq_client
 {
+	private string fail;
+	private bool is_success_status = false;
+
+	bool is_success()
+	{
+		return is_success_status;
+	}
+
+	string get_fail_msg()
+	{
+		return fail;
+	}
+	
 	char[] identity;
 	zctx_t* ctx;
 	void* worker;
@@ -84,6 +97,8 @@ class zmq_pp_broker_client: mq_client
 
 		//  Send out heartbeats at regular intervals
 		heartbeat_at = zclock_time() + PPP_HEARTBEAT_INTERVAL * 1000 * 10;
+		
+		is_success_status = true;
 	}
 
 	~this()

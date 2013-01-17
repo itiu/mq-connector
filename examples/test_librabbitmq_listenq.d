@@ -14,9 +14,9 @@ void main(char[][] args)
 	printf("test_amqp_listenq \r\n");
 	mq_client client = null;
 
-	string hostname = "192.168.0.101";
+	char[] hostname = cast(char[]) "192.168.0.101";
 	int port = 5672;
-	string queuename = "for-client-doc-notif";
+	char[] queuename = cast(char[]) "new-search";
 
 	amqp_connection_state_t conn;
 
@@ -27,8 +27,8 @@ void main(char[][] args)
 	die_on_error(sockfd = amqp_open_socket(hostname.ptr, port), "Opening socket");
 
 	amqp_set_sockfd(&conn, sockfd);
-	die_on_amqp_error(amqp_login(&conn, "bigarchive".ptr, 0, 131072, 0, amqp_sasl_method_enum.AMQP_SASL_METHOD_PLAIN, "ba".ptr,
-			"123456".ptr), "Logging in");
+	die_on_amqp_error(amqp_login(&conn, (cast(char[]) "bigarchive").ptr, 0, 131072, 0,
+			amqp_sasl_method_enum.AMQP_SASL_METHOD_PLAIN, (cast(char[]) "ba").ptr, (cast(char[]) "123456").ptr), "Logging in");
 	amqp_channel_open(&conn, 1);
 	die_on_amqp_error(amqp_get_rpc_reply(&conn), "Opening channel");
 

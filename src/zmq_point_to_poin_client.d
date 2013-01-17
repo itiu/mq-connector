@@ -21,6 +21,19 @@ static this()
 
 class zmq_point_to_poin_client: mq_client
 {
+	private string fail;
+	private bool is_success_status = false;
+
+	bool is_success()
+	{
+		return is_success_status;
+	}
+
+	string get_fail_msg()
+	{
+		return fail;
+	}
+	
 	int count = 0;
 
 	void* context = null;
@@ -40,7 +53,8 @@ class zmq_point_to_poin_client: mq_client
 			log.trace("error in zmq_connect: %s", zmq_error2string(zmq_errno()));
 			return null;
 		}
-
+		
+		is_success_status = true;
 		return soc;
 	}
 

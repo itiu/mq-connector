@@ -121,9 +121,6 @@ struct amqp_rpc_reply_t
 	int library_error; /* if AMQP_RESPONSE_LIBRARY_EXCEPTION, then 0 here means socket EOF */
 };
 
-extern(C)
-	amqp_connection_state_t amqp_new_connection();
-
 struct amqp_connection_state_t
 {
 	amqp_pool_t frame_pool;
@@ -221,7 +218,7 @@ amqp_bytes_t amqp_empty_bytes = {0, null};
 amqp_table_t amqp_empty_table = {0, null};
 amqp_array_t amqp_empty_array = {0, null};
 
-amqp_bytes_t amqp_cstring_bytes(string cstr)
+amqp_bytes_t amqp_cstring_bytes(char[] cstr)
 {
 	amqp_bytes_t result;
 	result.len = cstr.length;
@@ -290,7 +287,12 @@ struct amqp_basic_properties_t
 
 amqp_method_number_t AMQP_BASIC_DELIVER_METHOD = 0x003C003C; /* 60, 60; 3932220 */
 
-extern (C) int amqp_open_socket(immutable char *hostname, int portnumber);
+extern(C)
+	amqp_connection_state_t amqp_new_connection();
+
+extern(C)
+	int amqp_open_socket(char* hostname, int portnumber);
+
 extern(C)
 	int amqp_destroy_connection(amqp_connection_state_t* state);
 
@@ -303,12 +305,9 @@ extern(C)
 extern(C)
 	void amqp_set_sockfd(amqp_connection_state_t* state, int sockfd);
 
-extern (C) amqp_rpc_reply_t amqp_login(amqp_connection_state_t *state,
-                                   immutable char *vhost,
-                                  int channel_max,
-                                   int frame_max,
-                                  int heartbeat,
-                                  amqp_sasl_method_enum sasl_method, ...);
+extern(C)
+	amqp_rpc_reply_t amqp_login(amqp_connection_state_t* state, char* vhost, int channel_max, int frame_max, int heartbeat,
+			amqp_sasl_method_enum sasl_method, ...);
 
 extern(C)
 	amqp_channel_open_ok_t* amqp_channel_open(amqp_connection_state_t* state, amqp_channel_t channel);
@@ -340,8 +339,11 @@ extern(C)
 	amqp_rpc_reply_t amqp_connection_close(amqp_connection_state_t* state, int code);
 
 // --- utils ----
-extern (C) void die_on_error(int x, immutable char *context);
-extern (C) void die_on_amqp_error(amqp_rpc_reply_t x, immutable char *context);                             
+extern(C)
+	void die_on_error(int x, immutable char* context);
+
+extern(C)
+	void die_on_amqp_error(amqp_rpc_reply_t x, immutable char* context);
 
 extern(C)
 	extern void amqp_dump(void* buffer, size_t len);

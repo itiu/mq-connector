@@ -14,8 +14,15 @@ lib64/libzmq.a lib64/libstdc++.a lib64/libuuid.a lib64/librabbitmq.a -oflib-zero
 
 echo 'build examples'
 
-rm test_rabbitmq_listenq
-$DMD -version=D2 -m64  src/Log.d src/librabbitmq_headers.d src/mq_client.d examples/test_rabbitmq_listenq.d lib-zeromq-connector-64.a -oftest_rabbitmq_listenq
+rm test_librabbitmq_listenq
+$DMD -version=D2 -m64  src/Log.d src/librabbitmq_headers.d src/mq_client.d examples/test_librabbitmq_listenq.d \
+lib-zeromq-connector-64.a -oftest_librabbitmq_listenq
+
+rm test_rabbitmq_recieve
+$DMD -version=D2 -m64  src/Log.d src/librabbitmq_headers.d src/mq_client.d src/rabbitmq_client.d examples/test_rabbitmq_recieve.d \
+lib-zeromq-connector-64.a -oftest_rabbitmq_recieve
+
+
 #lib64/libstdc++.a lib64/libuuid.a lib64/librabbitmq.a
 
 #$DMD -version=D2 src/test_send.d src/Log.d src/zmq_point_to_poin_client.d src/libzmq_headers.d src/mq_client.d \
