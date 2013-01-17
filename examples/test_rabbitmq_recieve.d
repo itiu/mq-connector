@@ -31,10 +31,6 @@ void main(char[][] args)
 
 		Thread thread = new Thread(&client.listener);
 
-		writeln("#!!!1");
-		printf("log=%p\n", log);
-
-		writeln("#!!!2");
 		log.trace("start new Thread %X", &thread);
 		thread.start();
 	} else
@@ -49,7 +45,6 @@ int count = 0;
 
 void get_message(byte* message, int message_size, mq_client from_client, ref ubyte[])
 {
-	writeln("#!!!3");
 	count++;
 	printf("[%i] data: %s\n", count, cast(char*) message);
 

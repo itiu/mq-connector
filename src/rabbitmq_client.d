@@ -58,31 +58,22 @@ class rabbitmq_client: mq_client
 		} else
 		{
 			conn = amqp_new_connection();
-			
-			printf ("#1\n");
+
 			int port = to!(int)(params["port"]);
 
-			printf ("#2\n");
 			die_on_error(sockfd = amqp_open_socket(cast(char*) params["hostname"], port), "Opening socket");
 
-			printf ("#3\n");
 			amqp_set_sockfd(&conn, sockfd);
-			printf ("#4\n");
 			die_on_amqp_error(
 					amqp_login(&conn, cast(char*) params["vhost"], 0, 131072, 0, amqp_sasl_method_enum.AMQP_SASL_METHOD_PLAIN,
 							cast(char*) params["login"], cast(char*) params["credentional"]), "Logging in");
-			printf ("#5\n");
 			amqp_channel_open(&conn, 1);
-			printf ("#6\n");
 			die_on_amqp_error(amqp_get_rpc_reply(&conn), "Opening channel");
 
-			printf ("#7\n");
 			amqp_bytes_t qq = amqp_cstring_bytes(params["queuename"]);
 
-			printf ("#8\n");
 			amqp_basic_consume(&conn, 1, qq, amqp_empty_bytes, 0, 0, 0, amqp_empty_table);
 
-			printf ("#9\n");
 			die_on_amqp_error(amqp_get_rpc_reply(&conn), "Consuming");
 			is_success_status = true;
 		}
