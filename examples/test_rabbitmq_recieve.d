@@ -16,9 +16,9 @@ void main(char[][] args)
 
 	char[][string] params;
 
-	params["hostname"] = cast(char[]) "192.168.0.101";
+	params["hostname"] = cast(char[]) "172.17.1.230";
 	params["port"] = cast(char[]) "5672";
-	params["queuename"] = cast(char[]) "new-search";
+	params["queuename"] = cast(char[]) "for-clientB-doc-notif";
 	params["vhost"] = cast(char[]) "bigarchive";
 	params["login"] = cast(char[]) "ba";
 	params["credentional"] = cast(char[]) "123456";

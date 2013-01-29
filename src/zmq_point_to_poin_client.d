@@ -181,6 +181,8 @@ class zmq_point_to_poin_client: mq_client
 
 				if(need_resend_msg == true)
 				{
+					need_resend_msg = false;
+
 					rc = zmq_msg_init_size(&msg, 1);
 					if(rc != 0)
 					{
