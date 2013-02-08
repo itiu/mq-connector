@@ -52,10 +52,10 @@ static string PPP_READY;
 extern (C) void sighandler(int sig) nothrow @system
 {
 	printf("signal %d caught...\n", sig);
-//    system ("kill -kill " ~ text (getpid()));
 	try
 	{
-	    Runtime.terminate();
+	    system ("kill -kill " ~ text (getpid()));
+	    //Runtime.terminate();
 	}
 	catch (Exception ex)
 	{
