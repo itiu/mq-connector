@@ -8,16 +8,16 @@ private import core.thread;
 private import std.datetime;
 
 private import libzmq_headers;
+private import libczmq_headers;
 
 private import Log;
 
-private import dzmq;
 private import mq_client;
 
 private import std.outbuffer;
 
 private import core.stdc.stdio;
-import std.uuid;
+private import std.uuid;
 
 alias void listener_result;
 

@@ -1,0 +1,1 @@
+module myversion; public static char[] author=cast(char[])"Itiu"; public static char[] date=cast(char[])"Tue Jan 29 15:41:31 2013 +0400"; public static char[] hash=cast(char[])"22999c7";
