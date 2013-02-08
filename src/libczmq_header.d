@@ -2,6 +2,10 @@ module libczmq_header;
 
 private import libzmq_header;
 
+public static const byte ZFRAME_MORE = 1;
+public static const byte ZFRAME_REUSE = 2;
+public static const byte ZFRAME_DONTWAIT = 4;
+
 alias long int64_t;
 
 struct zctx_t 
@@ -68,6 +72,8 @@ extern (C) zmsg_t * zmsg_recv (void *socket);
 //  Return size of message, i.e. number of frames (0 or more).
 extern (C) size_t zmsg_size (zmsg_t *self);
 
+/////////////////// FRAME ////////////////////////////////////////////////////
+
 //  --------------------------------------------------------------------------
 //  Return the last frame. If there are no frames, returns NULL.
 extern (C) zframe_t *zmsg_last (zmsg_t *self);
@@ -95,14 +101,25 @@ extern (C) size_t zframe_size (zframe_t *self);
 extern (C) void zframe_reset (zframe_t *self, const void *data, size_t size);
 
 //  --------------------------------------------------------------------------
+//  Set cursor to first frame in message. Returns frame, or NULL.
+extern (C) zframe_t *zmsg_first (zmsg_t *self);
+
+//  --------------------------------------------------------------------------
+//  Return frame data copied into freshly allocated string
+//  Caller must free string when finished with it.
+extern (C) char *zframe_strdup (zframe_t *self);
+
+//  --------------------------------------------------------------------------
+//  Destructor
+extern (C) void zframe_destroy (zframe_t **self_p);
+
+//////////////////////////////////////////////////////////////////////////////
+
+//  --------------------------------------------------------------------------
 //  Send message to socket, destroy after sending. If the message has no
 //  frames, sends nothing but destroys the message anyhow. Safe to call
 //  if zmsg is null.
 extern (C) int zmsg_send (zmsg_t **self_p, void *socket);
-
-//  --------------------------------------------------------------------------
-//  Set cursor to first frame in message. Returns frame, or NULL.
-extern (C) zframe_t *zmsg_first (zmsg_t *self);
 
 //  --------------------------------------------------------------------------
 //  Dump message to stderr, for debugging and tracing
@@ -127,5 +144,29 @@ extern (C) void zsocket_destroy (zctx_t *ctx, void *socket);
 //  must set filters explicitly.
 extern (C) void * zsocket_new (zctx_t *ctx, int type);
 
-
+//  --------------------------------------------------------------------------
+//  Bind a socket to a formatted endpoint. If the port is specified as
+//  '*', binds to any free port from ZSOCKET_DYNFROM to ZSOCKET_DYNTO
+//  and returns the actual port number used.  Always returns the
+//  port number if successful.
+extern (C) int zsocket_bind (void *socket, const char *format, ...);
  
+//  --------------------------------------------------------------------------
+//  Add frame to the end of the message, i.e. after all other frames.
+//  Message takes ownership of frame, will destroy it when message is sent.
+//  Returns 0 on success
+extern (C) int zmsg_add (zmsg_t *self, zframe_t *frame);
+
+//  --------------------------------------------------------------------------
+//  Pop frame off front of message, caller now owns frame
+//  If next frame is empty, pops and destroys that empty frame.
+extern (C) zframe_t *zmsg_unwrap (zmsg_t *self);
+
+//  --------------------------------------------------------------------------
+//  Constructor
+extern (C) zmsg_t *zmsg_new ();
+
+//  --------------------------------------------------------------------------
+//  Remove first frame from message, if any. Returns frame, or NULL. Caller
+//  now owns frame and must destroy it when finished with it.
+extern (C) zframe_t *zmsg_pop (zmsg_t *self);

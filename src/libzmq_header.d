@@ -29,9 +29,9 @@ private import std.c.string;
 
 enum zmq_ver
 {
- ZMQ_VERSION_MAJOR=2,
- ZMQ_VERSION_MINOR=1,
- ZMQ_VERSION_PATCH=0
+ ZMQ_VERSION_MAJOR=3,
+ ZMQ_VERSION_MINOR=2,
+ ZMQ_VERSION_PATCH=2
 }
 
 //#define ZMQ_MAKE_VERSION(major, minor, patch) \
@@ -239,3 +239,7 @@ public string zmq_error2string (int errnum)
     char* err_text = zmq_strerror (errnum);
     return cast (string) err_text[0..strlen (err_text)];
 }
+
+
+extern (C) int zmq_sendmsg (void *s, zmq_msg_t *msg, int flags);
+extern (C) int zmq_recvmsg (void *s, zmq_msg_t *msg, int flags);
