@@ -5,6 +5,12 @@ private import std.stdio;
 private import core.stdc.stdlib;
 private import core.thread;
 
+private import core.runtime;
+private import std.process;
+private import std.conv;
+
+version (linux) import std.c.linux.linux;
+
 private import std.datetime;
 
 private import libzmq_header;
@@ -21,8 +27,10 @@ private import std.uuid;
 
 alias void listener_result;
 
+static int ZMQ_POLL_MSEC = 1;
+
 static int PPP_HEARTBEAT_LIVENESS = 5; //  		3-5 is reasonable
-static int PPP_HEARTBEAT_INTERVAL = 1000; //  	msecs
+static int PPP_HEARTBEAT_INTERVAL = 1000 * 10; //  	msecs
 static int PPP_INTERVAL_INIT = 1000; //  		Initial reconnect
 static int PPP_INTERVAL_MAX = 32000; //  		After exponential backoff
 static string PPP_HEARTBEAT = "H";
@@ -39,6 +47,20 @@ static string PPP_BEHAVIOR_READER = "RR";
 static string PPP_BEHAVIOR_LOGGER = "RL";
 
 static string PPP_READY;
+
+// Called upon a signal from Linux
+extern (C) void sighandler(int sig) nothrow @system
+{
+	printf("signal %d caught...\n", sig);
+//    system ("kill -kill " ~ text (getpid()));
+	try
+	{
+	    Runtime.terminate();
+	}
+	catch (Exception ex)
+	{
+	}
+}
 
 class zmq_pp_broker_client: mq_client
 {
@@ -112,7 +134,7 @@ class zmq_pp_broker_client: mq_client
 	{
 		message_acceptor = _message_acceptor;
 	}
-
+ 
 	void get_count(out int cnt)
 	{
 		cnt = count;
@@ -121,21 +143,31 @@ class zmq_pp_broker_client: mq_client
 	// in thread listens to the queue and calls _message_acceptor
 	listener_result listener()
 	{
+		version (linux) 
+		{
+		    // установим обработчик сигналов прерывания процесса
+		    signal(SIGABRT, &sighandler);
+		    signal(SIGTERM, &sighandler);
+		    signal(SIGQUIT, &sighandler);
+		    signal(SIGINT, &sighandler);
+		}	
+
+
 		while(1)
 		{
 			//			StopWatch sw;
 			zmq_pollitem_t items[] = new zmq_pollitem_t[1];
-
-			//        printf("create soc\n");
 
 			items[0].socket = worker;
 			items[0].fd = 0;
 			items[0].events = io_multiplexing.ZMQ_POLLIN;
 			items[0].revents = 0;
 
-			int rc = zmq_poll(cast(zmq_pollitem_t*) items, 1, PPP_HEARTBEAT_INTERVAL * 1000);
+			int rc = zmq_poll(cast(zmq_pollitem_t*) items, 1, PPP_HEARTBEAT_INTERVAL * ZMQ_POLL_MSEC);
 			if(rc == -1)
+			{
 				break; //  Interrupted
+			}
 
 			//        printf("items [0].revents = %d\n", items [0].revents);
 			if(items[0].revents & io_multiplexing.ZMQ_POLLIN)
@@ -199,7 +231,6 @@ class zmq_pp_broker_client: mq_client
 
 				} else if(size_msg == 1)
 				{
-
 					zframe_t* frame = zmsg_first(msg);
 					char* msg_body = cast(char*) zframe_data(frame);
 					//                 printf ("msg_body1 =%s\n", msg_body);
@@ -229,6 +260,10 @@ class zmq_pp_broker_client: mq_client
 					{
 						interval *= 2;
 					}
+					else
+					{
+					    system ("kill -kill " ~ text (getpid()));
+					}
 
 					zsocket_destroy(ctx, worker);
 					worker = s_worker_socket(ctx, bind_to);
@@ -252,6 +287,8 @@ class zmq_pp_broker_client: mq_client
 			//			if(zctx_interrupted)
 			//				break;
 		}
+
+		system ("kill -kill " ~ text (getpid()));
 
 		return;
 	}
