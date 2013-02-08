@@ -1,6 +1,6 @@
-module libczmq_headers;
+module libczmq_header;
 
-private import libzmq_headers;
+private import libzmq_header;
 
 alias long int64_t;
 

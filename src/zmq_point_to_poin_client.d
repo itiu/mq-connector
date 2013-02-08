@@ -4,7 +4,7 @@ private import std.c.string;
 private import std.stdio;
 private import std.outbuffer;
 
-private import libzmq_headers;
+private import libzmq_header;
 private import mq_client;
 private import Log;
 

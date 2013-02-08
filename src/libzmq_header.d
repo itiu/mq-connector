@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-module libzmq_headers;
+module libzmq_header;
 
 private import std.c.string;
 

@@ -7,8 +7,8 @@ private import core.thread;
 
 private import std.datetime;
 
-private import libzmq_headers;
-private import libczmq_headers;
+private import libzmq_header;
+private import libczmq_header;
 
 private import Log;
 
