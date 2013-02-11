@@ -29,11 +29,11 @@ alias void listener_result;
 
 static int ZMQ_POLL_MSEC = 1;
 
-static int PPP_HEARTBEAT_LIVENESS = 5; //  		3-5 is reasonable
-static int PPP_HEARTBEAT_INTERVAL = 1000 * 10; //  	msecs
-static int PPP_INTERVAL_INIT = 1000; //  		Initial reconnect
-static int PPP_INTERVAL_MAX = 32000; //  		After exponential backoff
-static string PPP_HEARTBEAT = "H";
+const PPP_HEARTBEAT_LIVENESS = 5; //  		3-5 is reasonable
+const PPP_HEARTBEAT_INTERVAL = 1000 * 10; //  	msecs
+const PPP_INTERVAL_RECONNECT_INIT = 1000; //  		Initial reconnect
+const PPP_INTERVAL_RECONNECT_MAX = 32000; //  		After exponential backoff
+const PPP_HEARTBEAT = "H";
 
 // поведение:
 //	all - выполняет все операции
@@ -41,15 +41,15 @@ static string PPP_HEARTBEAT = "H";
 //  reader - только операции чтения
 //  logger - ничего не выполняет а только логгирует операции, параметры logging не учитываются 		
 
-static string PPP_BEHAVIOR_ALL = "RA";
-static string PPP_BEHAVIOR_WRITER = "RW";
-static string PPP_BEHAVIOR_READER = "RR";
-static string PPP_BEHAVIOR_LOGGER = "RL";
+const PPP_BEHAVIOR_ALL = "RA";
+const PPP_BEHAVIOR_WRITER = "RW";
+const PPP_BEHAVIOR_READER = "RR";
+const PPP_BEHAVIOR_LOGGER = "RL";
 
 static string PPP_READY;
 
 // Called upon a signal from Linux
-extern (C) void sighandler0(int sig) nothrow @system
+extern (C) public void sighandler0(int sig) nothrow @system
 {
 	printf("signal %d caught...\n", sig);
 	try
@@ -115,10 +115,10 @@ class zmq_pp_broker_client: mq_client
 
 		//  If liveness hits zero, queue is considered disconnected
 		liveness = PPP_HEARTBEAT_LIVENESS;
-		interval = PPP_INTERVAL_INIT;
+		interval = PPP_INTERVAL_RECONNECT_INIT;
 
 		//  Send out heartbeats at regular intervals
-		heartbeat_at = zclock_time() + PPP_HEARTBEAT_INTERVAL * 1000 * 10;
+		heartbeat_at = zclock_time() + PPP_HEARTBEAT_INTERVAL;
 		
 		is_success_status = true;
 	}
@@ -166,7 +166,7 @@ class zmq_pp_broker_client: mq_client
 			int rc = zmq_poll(cast(zmq_pollitem_t*) items, 1, PPP_HEARTBEAT_INTERVAL * ZMQ_POLL_MSEC);
 			if(rc == -1)
 			{
-				break; //  Interrupted
+			//	break; //  Interrupted
 			}
 
 			//        printf("items [0].revents = %d\n", items [0].revents);
@@ -231,12 +231,12 @@ class zmq_pp_broker_client: mq_client
 
 				} else if(size_msg == 1)
 				{
+				    //printf ("I'm recieve message size = 1");
 					zframe_t* frame = zmsg_first(msg);
 					char* msg_body = cast(char*) zframe_data(frame);
-					//                 printf ("msg_body1 =%s\n", msg_body);
 					if(strncmp(msg_body, cast(char*) PPP_HEARTBEAT, PPP_HEARTBEAT.length) == 0)
 					{
-						//						printf ("I: recieve HEARTBEAT\n");
+						printf ("I: recieve HEARTBEAT\n");
 						liveness = PPP_HEARTBEAT_LIVENESS;
 					} else
 					{
@@ -245,7 +245,7 @@ class zmq_pp_broker_client: mq_client
 					}
 					zmsg_destroy(&msg);
 				}
-				interval = PPP_INTERVAL_INIT;
+				interval = PPP_INTERVAL_RECONNECT_INIT;
 			} else
 			{
 				if(liveness < PPP_HEARTBEAT_LIVENESS)
@@ -256,7 +256,7 @@ class zmq_pp_broker_client: mq_client
 					printf("W: reconnecting in %zd msec...\n", interval);
 					Thread.sleep(dur!("msecs")(interval));
 
-					if(interval < PPP_INTERVAL_MAX)
+					if(interval < PPP_INTERVAL_RECONNECT_MAX)
 					{
 						interval *= 2;
 					}
@@ -271,10 +271,10 @@ class zmq_pp_broker_client: mq_client
 				}
 			}
 
-			//  Send heartbeat to queue if it's time
+			//  Send heartbeat to broker if it's time
 			if(zclock_time() > heartbeat_at)
 			{
-				heartbeat_at = zclock_time() + PPP_HEARTBEAT_INTERVAL * 1000 * 10;
+				heartbeat_at = zclock_time() + PPP_HEARTBEAT_INTERVAL;
 				//          printf ("I: worker heartbeat\n");
 				zframe_t* frame = zframe_new(cast(char*) PPP_HEARTBEAT, PPP_HEARTBEAT.length);
 				zframe_send(&frame, worker, 0);
