@@ -49,7 +49,7 @@ static string PPP_BEHAVIOR_LOGGER = "RL";
 static string PPP_READY;
 
 // Called upon a signal from Linux
-extern (C) void sighandler(int sig) nothrow @system
+extern (C) void sighandler0(int sig) nothrow @system
 {
 	printf("signal %d caught...\n", sig);
 	try
@@ -146,10 +146,10 @@ class zmq_pp_broker_client: mq_client
 		version (linux) 
 		{
 		    // установим обработчик сигналов прерывания процесса
-		    signal(SIGABRT, &sighandler);
-		    signal(SIGTERM, &sighandler);
-		    signal(SIGQUIT, &sighandler);
-		    signal(SIGINT, &sighandler);
+		    signal(SIGABRT, &sighandler0);
+		    signal(SIGTERM, &sighandler0);
+		    signal(SIGQUIT, &sighandler0);
+		    signal(SIGINT, &sighandler0);
 		}	
 
 
