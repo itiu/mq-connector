@@ -61,12 +61,12 @@ class rabbitmq_client: mq_client
 
 			int port = to!(int)(params["port"]);
 
-			die_on_error(sockfd = amqp_open_socket(cast(char*) params["hostname"], port), "Opening socket");
+			die_on_error(sockfd = amqp_open_socket(cast(char*) (params["hostname"] ~ "\0"), port), cast (immutable char*) ("Error on opening socket (AMQP) [" ~ params["hostname"] ~ "]" ));
 
 			amqp_set_sockfd(&conn, sockfd);
 			die_on_amqp_error(
-					amqp_login(&conn, cast(char*) params["vhost"], 0, 131072, 0, amqp_sasl_method_enum.AMQP_SASL_METHOD_PLAIN,
-							cast(char*) params["login"], cast(char*) params["credentional"]), "Logging in");
+					amqp_login(&conn, cast(char*) (params["vhost"] ~ "\0"), 0, 131072, 0, amqp_sasl_method_enum.AMQP_SASL_METHOD_PLAIN,
+							cast(char*) (params["login"] ~ "\0"), cast(char*) (params["credentional"] ~ "\0")), "Logging in");
 			amqp_channel_open(&conn, 1);
 			die_on_amqp_error(amqp_get_rpc_reply(&conn), "Opening channel");
 
