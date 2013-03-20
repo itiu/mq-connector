@@ -2,7 +2,7 @@ module Log;
 
 private import std.format;
 private import std.c.stdio;
-private import std.datetime;
+import std.datetime;
 
 import std.array: appender;
 
@@ -37,7 +37,6 @@ public class Logger
 		trace_logfilename = log_name;
 		src = _src;
 		ext = _ext;
-//		open_new_file ();
 	}
 
 	~this()
@@ -90,8 +89,8 @@ public class Logger
 		int minute = ptm.tm_min;
 		int second = ptm.tm_sec;
 		auto now = Clock.currTime();
-		auto milliseconds = now.fracSec;
-		
+		int usecs = now.fracSec.usecs;
+
 		count ++;
 
 		if (ff is null || prev_time > 0 && day != prev_time || count > 1_000_000)
@@ -101,18 +100,18 @@ public class Logger
 		
 		auto writer = appender!string();
 
-		formattedWrite(writer, "[%04d-%02d-%02d %02d:%02d:%02d.%03d]\n%s\n", year, month, day, hour, minute, second, milliseconds, str_io);
+		formattedWrite(writer, "[%04d-%02d-%02d %02d:%02d:%02d.%03d]\n%s\n", year, month, day, hour, minute, second, usecs, str_io);
 
 		fwrite (cast(char*)writer.data , 1 , writer.data.length , ff);
 		
-		version (X86_64)
-		{
-		    fwrite (data , 1 , len - 1, ff);
-		}
-		else
-		{
-		    fwrite (data , 1 , cast(uint)len - 1, ff);
-		}
+                version (X86_64)
+                {
+                    fwrite (data , 1 , len - 1, ff);
+                }
+                else
+                {
+                    fwrite (data , 1 , cast(uint)len - 1, ff);
+                }
 
 		fputc('\r', ff);
 		
@@ -132,7 +131,7 @@ public class Logger
 		int minute = ptm.tm_min;
 		int second = ptm.tm_sec;
 		auto now = Clock.currTime();
-		auto milliseconds = now.fracSec;
+		int usecs = now.fracSec.usecs;
 
 		count++;
 		if (ff is null || prev_time > 0 && day != prev_time || count > 1_000_000)
@@ -144,9 +143,9 @@ public class Logger
 		auto writer = appender!string();
 
 		if (src.length > 0)
-		    formattedWrite(writer, "[%04d-%02d-%02d %02d:%02d:%02d.%03d] [%s] ", year, month, day, hour, minute, second, milliseconds, src);
+		    formattedWrite(writer, "[%04d-%02d-%02d %02d:%02d:%02d.%03d] [%s] ", year, month, day, hour, minute, second, usecs, src);
 		else
-		    formattedWrite(writer, "[%04d-%02d-%02d %02d:%02d:%02d.%03d] ", year, month, day, hour, minute, second, milliseconds);
+		    formattedWrite(writer, "[%04d-%02d-%02d %02d:%02d:%02d.%03d] ", year, month, day, hour, minute, second, usecs);
 
 		formattedWrite(writer, fmt, args);
 		writer.put(cast(char) 0);
