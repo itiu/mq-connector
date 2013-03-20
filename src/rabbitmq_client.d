@@ -174,7 +174,7 @@ class rabbitmq_client: mq_client
 					ubyte[] outbuff;
 
 					message_acceptor((cast(byte*) frame.payload.body_fragment.bytes),
-							cast(uint) (frame.payload.body_fragment.len + 1), this, outbuff);
+							cast(uint) (frame.payload.body_fragment.len), this, outbuff);
 
 					//					send(soc_rep, cast(char*) outbuff, cast(uint) outbuff.length, false);
 				} catch(Exception ex)
