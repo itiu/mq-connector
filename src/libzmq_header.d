@@ -184,14 +184,6 @@ enum send_recv_opt
  ZMQ_SNDMORE = 2
 }
 
-extern (C) void *zmq_socket (void *context, int type);
-extern (C) int zmq_close (void *s);
-extern (C) int zmq_setsockopt (void *s, int option, void *optval, size_t optvallen); 
-extern (C) int zmq_getsockopt (void *s, int option, void *optval, size_t *optvallen);
-extern (C) int zmq_bind (void *s, char *addr);
-extern (C) int zmq_connect (void *s, char *addr);
-extern (C) int zmq_send (void *s, zmq_msg_t *msg, int flags);
-extern (C) int zmq_recv (void *s, zmq_msg_t *msg, int flags);
 
 /******************************************************************************/
 /*  I/O multiplexing.                                                         */
@@ -241,5 +233,14 @@ public string zmq_error2string (int errnum)
 }
 
 
+extern (C) void *zmq_socket (void *context, int type);
+extern (C) int zmq_close (void *s);
+extern (C) int zmq_setsockopt (void *s, int option, void *optval, size_t optvallen); 
+extern (C) int zmq_getsockopt (void *s, int option, void *optval, size_t *optvallen);
+extern (C) int zmq_bind (void *s, char *addr);
+extern (C) int zmq_connect (void *s, char *addr);
+extern (C) int zmq_send (void *s, zmq_msg_t *msg, int flags);
+extern (C) int zmq_recv (void *s, zmq_msg_t *msg, int flags);
+//extern (C) int zmq_unbind (void *s, char *addr);
 extern (C) int zmq_sendmsg (void *s, zmq_msg_t *msg, int flags);
 extern (C) int zmq_recvmsg (void *s, zmq_msg_t *msg, int flags);

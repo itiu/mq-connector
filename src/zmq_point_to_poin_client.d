@@ -1,5 +1,6 @@
 module zmq_point_to_poin_client;
 
+private import core.thread;
 private import std.c.string;
 private import std.stdio;
 private import std.outbuffer;
@@ -10,7 +11,13 @@ private import Log;
 
 private import core.stdc.stdio;
 
+
+//private import core.runtime;
+private import std.process;
+private import std.conv;
+
 alias void listener_result;
+
 
 Logger log;
 
@@ -58,18 +65,11 @@ class zmq_point_to_poin_client: mq_client
 		return soc;
 	}
 
-	this(string bind_to)
-	{
-		context = zmq_init(1);
-		soc_rep = zmq_socket(context, soc_type.ZMQ_REP);
+	string bind_to;
 
-		log.trace("libzmq_client: listen from client: %s", bind_to);
-		int rc = zmq_bind(soc_rep, cast(char*) (bind_to ~ "\0"));
-		if(rc != 0)
-		{
-			log.trace("error in zmq_bind: %s", zmq_error2string(zmq_errno()));
-			throw new Exception("error in zmq_bind: " ~ zmq_error2string(zmq_errno()));
-		}
+	this(string _bind_to)
+	{
+		bind_to = _bind_to;
 	}
 
 	~this()
@@ -172,11 +172,22 @@ class zmq_point_to_poin_client: mq_client
 
 	listener_result listener()
 	{
-		while(true)
+		while(1)
 		{
-			while(true)
+                	context = zmq_init(1);
+                	soc_rep = zmq_socket(context, soc_type.ZMQ_REP);
+            
+                	log.trace("libzmq_client: listen from client: %s", bind_to);
+                	int rc = zmq_bind(soc_rep, cast(char*) (bind_to ~ "\0"));
+                	if(rc != 0)
+                	{
+                        	log.trace("error in zmq_bind: %s", zmq_error2string(zmq_errno()));
+                        	throw new Exception("error in zmq_bind: " ~ zmq_error2string(zmq_errno()));
+                	}
+
+
+			while(1)
 			{
-				int rc;
 				zmq_msg_t msg;
 
 				if(need_resend_msg == true)
@@ -218,7 +229,7 @@ class zmq_point_to_poin_client: mq_client
 				rc = zmq_recv(soc_rep, &msg, 0);
 				if(rc != 0)
 				{
-					log.trace("error in zmq_recv: %s", zmq_error2string(zmq_errno()));
+					log.trace("listener:error in zmq_recv: %s", zmq_error2string(zmq_errno()));
 					zmq_msg_close(&msg);
 					break;
 				} else
@@ -249,6 +260,9 @@ class zmq_point_to_poin_client: mq_client
 					log.trace("error in zmq_msg_close: %s", zmq_error2string(zmq_errno()));
 				}
 			}
+//			zmq_unbind (soc_rep, cast(char*) (bind_to ~ "\0"));
+			zmq_close (soc_rep);			
+			core.thread.Thread.sleep(dur!("seconds")(1));
 		}
 	}
 }
