@@ -320,6 +320,49 @@ extern(C)
 			amqp_bytes_t consumer_tag, amqp_boolean_t no_local, amqp_boolean_t no_ack, amqp_boolean_t exclusive,
 			amqp_table_t arguments);
 
+
+struct amqp_queue_bind_t
+{
+  uint16_t ticket;
+  amqp_bytes_t queue;
+  amqp_bytes_t exchange;
+  amqp_bytes_t routing_key;
+  amqp_boolean_t nowait;
+  amqp_table_t arguments;
+};
+
+struct amqp_queue_bind_ok_t 
+{
+  char dummy; /* Dummy field to avoid empty struct */
+};
+
+
+extern(C)
+ amqp_queue_bind_ok_t * amqp_queue_bind(amqp_connection_state_t* state, amqp_channel_t channel, amqp_bytes_t queue, amqp_bytes_t exchange, amqp_bytes_t routing_key, amqp_table_t arguments);
+
+struct amqp_queue_declare_t
+{
+  uint16_t ticket;
+  amqp_bytes_t queue;
+  amqp_boolean_t passive;
+  amqp_boolean_t durable;
+  amqp_boolean_t exclusive;
+  amqp_boolean_t auto_delete;
+  amqp_boolean_t nowait;
+  amqp_table_t arguments;
+};
+
+struct amqp_queue_declare_ok_t
+{
+  amqp_bytes_t queue;
+  uint32_t message_count;
+  uint32_t consumer_count;
+};
+
+extern (C) 
+	amqp_queue_declare_ok_t* amqp_queue_declare(amqp_connection_state_t* state, amqp_channel_t channel, amqp_bytes_t queue, amqp_boolean_t passive, amqp_boolean_t durable, amqp_boolean_t exclusive, amqp_boolean_t auto_delete, amqp_table_t arguments);
+
+
 extern(C)
 	void amqp_maybe_release_buffers(amqp_connection_state_t* state);
 
@@ -353,3 +396,22 @@ extern(C)
 
 extern(C)
 	extern void microsleep(int usec);
+
+struct amqp_basic_publish_t 
+{
+  uint16_t ticket;
+  amqp_bytes_t exchange;
+  amqp_bytes_t routing_key;
+  amqp_boolean_t mandatory;
+  amqp_boolean_t immediate;
+};
+
+extern(C)
+int
+ amqp_basic_publish(amqp_connection_state_t* state, amqp_channel_t channel,
+            amqp_bytes_t exchange, amqp_bytes_t routing_key,
+                        amqp_boolean_t mandatory, amqp_boolean_t immediate,
+                        amqp_basic_properties_t *properties,
+                        amqp_bytes_t _body);
+
+
